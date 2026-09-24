@@ -2,24 +2,46 @@
 
 Eine Anleitung für Entwickler die KI effektiver nutzen wollen. Die Beispiele beziehen sich speziell auf VSCode und VSCodium, die meisten Hinweise gelten aber auch für andere Editoren und IDEs.
 
-== VSCode/Codium KI Chat Bedienung
+:toc: left
+:toclevels: 4
+:sectnums:
 
-=== 1. Modus passend auswählen
+== Kurzbeschreibung
+
+=== Modus passend auswählen
 
 * `Ask`/`Chat`: zum Fragen und Verstehen
 * `Plan`: lässt dich den Plan prüfen und freigeben, bevor der Agent Code schreibt.
 * `Agent`: arbeitet über mehrere Dateien hinweg, führt Tests aus und validiert Ergebnisse
 
-''''
-=== 2. Kontext gezielt mitgeben.
+{blank} +
+
+'''
+=== Kontext gezielt mitgeben.
 
 * Hänge relevante Datien, Ordner oder Selektionen an, statt die KI raten zu lassen. 
 
-''''
-=== 3. Instrutioncs: Regeln, Stil, Architektur, Sicherheit
+{blank} +
+
+'''
+=== Instrutioncs: Regeln, Stil, Architektur, Sicherheit
 
 [NOTE]
 Lege einmalig fest, wie deine KI arbeiten soll, etwa Stack, Namenskonventionen, Architektur und Sicherheitsregeln. Laut VS-Code-Doku gehören dort Coding-Stil, bevorzugte Bibliotheken, Architekturmuster sowie Sicherheits- und Fehlerbehandlungsregeln hinein. Mit AGENTS.md kannst du projektspezifische Anweisungen teilen und alle Agenten auf denselben Stand bringen
+
+==== Beschreibung/Tipps
+
+* **Kurz halten:** Die Datei steht bei jeder Anfrage im Kontext. Als Faustregel reichen 50 bis 150 Zeilen.
+
+* **Nur Nicht-Offensichtliches:** Schreibe hinein, was die KI nicht selbst aus dem Code erkennt. "Das ist ein C#-Projekt" braucht sie nicht.
+
+* **Wachsen lassen:** Fang klein an. Wenn die KI denselben Fehler zum zweiten Mal macht, kommt eine Regel dazu.
+
+* **Keine Widersprüche:** Prüfe, dass sich Regeln nicht gegenseitig aufheben, sonst richtet sich die KI nach dem Zufall.
+
+* **Keine Geheimnisse:** Die Datei liegt im Repo und wird bei jeder Anfrage mitgeschickt.
+
+==== Dateistruktur
 
 * Allgemein:
 
@@ -35,11 +57,58 @@ Lege einmalig fest, wie deine KI arbeiten soll, etwa Stack, Namenskonventionen, 
 * Claude Code:
 ** `CLAUDE.md` (ohne CLAUDE.md fällt neuere Version auf `AGENTS.md` zurück)
 
-''''
-=== 4. Promt-Dateien:
+==== Beispiel: AGENTS.md / copilot-instructions.md
+
+[source,markdown]
+----
+# AGENTS.md – LrCatalogSync
+
+## Projekt <1>
+WinForms-App (.NET 10), die einen Lightroom-Katalog per rclone auf ein NAS synchronisiert.
+
+## Befehle <2>
+- Build: `dotnet build LrCatalogSync.csproj`
+- Keine automatisierten Tests: Änderungen per Build und Laufzeit-Check prüfen.
+
+## Regeln <3>
+- Kommentare und Log-Texte auf Deutsch, Code-Bezeichner auf Englisch.
+- Pfade nur in `GlobalData`, Konstanten nur in `GlobalConst`, nichts hartkodieren.
+- Lock-Dateien (`*.lrcat.lock`, `*.lrcat-shm`, `*.lrcat-wal`) niemals synchronisieren.
+
+## Vor jeder Änderung <4>
+- rclone-Aufrufe nur nach Rückfrage ändern.
+- Große Änderungen erst als Plan vorlegen, dann als `ToDo/Konzept-<Thema>.md` ausarbeiten.
+
+## Fertig, wenn <5>
+- `dotnet build` läuft ohne Fehler und ohne neue Warnungen.
+----
+<1> `Projekt` Worum es geht, in ein bis zwei Sätzen. Die KI kennt so den Zweck des Projekts.
+<2> `Befehle` Wie gebaut und geprüft wird. Damit kann die KI ihr Ergebnis selbst kontrollieren. Das ist der wichtigste Teil.
+<3> `Regeln` Konkrete, prüfbare Regeln statt Floskeln wie "schreibe sauberen Code". Besonders wertvoll sind Regeln, die man nicht aus dem Code ablesen kann.
+<4> `Vor jeder Änderung` Wann die KI nachfragen oder einen Plan vorlegen muss. Schützt vor riskanten Änderungen.
+<5> `Fertig, wenn` Das Abschlusskriterium. Es sagt der KI, wann sie fertig ist.
+
+{blank} +
+
+'''
+=== Promt-Dateien:
 
 [NOTE]
 Ein gespeicherter Textbaustein für eine Aufgabe, die du per `/name` startest. Statt jedes Mal denselben langen Auftrag zu tippen, rufst du ihn ab. Beispiel: `/write-tests` enthält "Schreibe xUnit-Tests für die markierte Klasse, Namensschema Methode_Zustand_Ergebnis, danach dotnet test ausführen".
+
+==== Beschreibung/Tipps
+
+* **Handarbeit statt Automatik:** Anders als Instructions werden Prompt-Dateien nur geladen, wenn du sie manuell im Chat aufrufst.
+
+* **Platzhalter:** Im Text kannst du z. B. ${selection} (markierter Text), ${file} (aktuelle Datei) oder ${input:thema} (Abfrage beim Aufruf) verwenden.
+
+* **Weitere Frontmatter-Felder:** Optional gibt es name (Aufrufname, sonst der Dateiname), model (festes Modell), tools (erlaubte Werkzeuge) und argument-hint (Hinweistext im Eingabefeld).
+
+* **Prompt oder Skill:** Nach der VS-Code-Doku eignen sich Prompt-Dateien für leichte Einzelaufgaben. Ein Skill lohnt sich erst bei einer wiederverwendbaren Fähigkeit mit mehreren Dateien, Skripten und Ressourcen.
+
+* **Andere Tools:** Der Inhalt bleibt gleich, nur Ort und Kopf ändern sich. Bei Continue liegt die Datei in .continue/prompts/ und braucht invokable: true im Frontmatter, bei Claude Code in .claude/commands/.
+
+==== Dateistruktur
 
 * Bei Github Copilot:
 ** `.github/prompts/*.prompt.md`
@@ -50,12 +119,43 @@ Ein gespeicherter Textbaustein für eine Aufgabe, die du per `/name` startest. S
 * Claude Code:
 ** `.claude/commands/`
 
-''''
-=== 5. Custom-Agents:
+==== Beispiel: prompt.md
+
+Eine Prompt-Datei ist ein gespeicherter Auftrag. Du rufst ihn im Chat mit `/name` auf, statt ihn jedes Mal neu zu tippen.
+
+Datei: `.github/prompts/regelcheck.prompt.md` -> Aufruf im Chat mit `/regelcheck`
+
+[source,markdown]
+----
+---
+description: Prüft die aktuellen Änderungen gegen die Geschäftsregeln <1>
+agent: agent <2>
+---
+Prüfe die aktuellen Änderungen (`git diff`) gegen die <3>
+"Kritischen Geschäftsregeln" in [AGENTS.md](../../AGENTS.md).
+
+Gehe die Regeln 1–6 einzeln durch: <4>
+- Ist die Regel von der Änderung berührt?
+- Falls ja: Ist sie eingehalten? Bei Verstößen Datei und Zeile nennen.
+
+Ändere keinen Code. Schließe mit einer Zusammenfassung in drei Sätzen ab. <5>
+----
+<1> Kurzbeschreibung. Sie erscheint in der Liste, wenn du `/` tippst.
+<2> Modus, in dem der Auftrag läuft: `ask`, `edit`, `agent` oder der Name eines eigenen Agenten. Hier `agent`, weil der Diff über das Terminal gelesen wird.
+<3> Der eigentliche Auftrag, geschrieben wie ein normaler Prompt. Der Markdown-Link lädt die `AGENTS.md` als Kontext.
+<4> Ein fester Ablauf sorgt für gleichbleibende Ergebnisse.
+<5> Grenzen und Ausgabeform. Hier darf die KI nur prüfen und nichts ändern.
+
+{blank} +
+
+'''
+=== Custom-Agents:
 
 [NOTE]
 Ein Custom-Agent ist eine Rolle mit eigenen Anweisungen, Tool-Auswahl und optional eigenem Modell,
 z. B. Planer oder Reviewer.
+
+==== Dateistruktur
 
 * Bei Github Copilot:
 ** `.github/agents/*.agent.md`
@@ -66,12 +166,66 @@ z. B. Planer oder Reviewer.
 * Claude Code:
 ** `.claude/agents/`
 
+==== Beispiel: Planer und Umsetzer
 
-''''
-=== 6. MCP-Konfiguration:
+Ablauf: Der Planer legt einen Plan vor. Nach deiner Prüfung klickst du auf einen Button, der zum Umsetzer wechselt. Dieser legt das Konzept in `ToDo/` ab und setzt den Plan um.
+
+Datei 1: `.github/agents/planer.agent.md`
+
+[source,markdown]
+----
+---
+name: planer
+description: Plant große Änderungen, ohne Code zu ändern
+tools: ['search', 'read']
+handoffs: <1>
+  - label: Freigeben und umsetzen <2>
+    agent: umsetzer <3>
+    prompt: Lege den Plan oben als ToDo/Konzept-<Thema>.md ab und setze ihn danach Schritt für Schritt um. <4>
+    send: false <5>
+---
+Du bist Planer für das Projekt LrCatalogSync. Du änderst niemals Code.
+
+Vorgehen:
+1. Lies die `AGENTS.md` (Geschäftsregeln 1–6) und das passende Konzept in `ToDo/`.
+2. Erkunde den betroffenen Code, bevor du planst.
+3. Lege einen Plan vor: Ziel, betroffene Dateien, Schritte und Risiken für die Geschäftsregeln.
+4. Frage nach Freigabe. Formuliere den Plan so, dass er unverändert als `ToDo/Konzept-<Thema>.md` abgelegt werden kann.
+----
+<1> Liste der Schaltflächen, die nach der Antwort des Planers erscheinen.
+<2> Beschriftung des Buttons.
+<3> Name des Ziel-Agenten. Er muss genau zum `name` der zweiten Datei passen.
+<4> Der vorbereitete Prompt, der beim Wechsel im Eingabefeld steht.
+<5> `false` = der Prompt wird nur vorausgefüllt, du prüfst ihn und sendest selbst. Bei `true` würde er sofort abgeschickt.
+
+Datei 2: `.github/agents/umsetzer.agent.md`
+
+[source,markdown]
+----
+---
+name: umsetzer
+description: Setzt freigegebene Pläne um
+tools: ['search', 'read', 'edit', 'execute'] <1>
+---
+Du setzt freigegebene Pläne für LrCatalogSync um.
+
+- Setze nur um, was im Plan steht. Bei Abweichungen erst nachfragen. <2>
+- Halte dich an die `AGENTS.md`.
+- Prüfe am Ende mit `dotnet build`. <3>
+----
+<1> Anders als der Planer darf der Umsetzer Dateien ändern (`edit`) und Befehle ausführen (`execute`).
+<2> Die Grenze verhindert, dass die KI während der Umsetzung den Plan erweitert.
+<3> Das Terminal wird für den Build gebraucht.
+
+{blank} +
+
+'''
+=== MCP-Konfiguration:
 
 [NOTE]
 MCP liefert Live-Daten aus externen Systemen. MCP brauchst du z. B. für Datenbanken, Issue-Tracker, Dokumentation oder externe Tools.
+
+==== Dateistruktur
 
 * Bei Github Copilot:
 ** `.vscode/mcp.json`
@@ -82,13 +236,29 @@ MCP liefert Live-Daten aus externen Systemen. MCP brauchst du z. B. für Datenba
 * Claude Code:
 ** `.mcp.json`
 
+{blank} +
 
-
-''''
-=== 7. Skills:
+'''
+=== Skills:
 
 [NOTE]
 Ein Ordner mit einer Anleitung `SKILL.md`, optional mit Vorlagen und Skripten, für einen bestimmten Arbeitsablauf. Die KI sieht dauerhaft nur Name und Beschreibung. Passt eine Aufgabe, lädt sie die ganze Anleitung selbst. Beispiel: Ein Skill "neues-formular" beschreibt, wie ein WinForms-Formular samt Presenter und Test angelegt wird. Wenn du sagst "Lege ein Formular für Kunden an", holt die KI ihn von selbst. Der Unterschied zur Prompt-Datei ist, dass die KI entscheidet und nicht du. Der Unterschied zu Instructions ist, dass Skills nur bei Bedarf Platz im Kontext belegen.
+
+==== Beschreibung/Tipps
+
+* **Spart Kontext**: Die KI sieht dauerhaft nur Name und Beschreibung. Die Anleitung und die Dateien in references/ oder scripts/ lädt sie erst bei Bedarf. Deshalb sind auch viele Skills unproblematisch.
+
+* **Aufbau**: Pflicht ist nur die SKILL.md. Optional gibt es scripts/ (ausführbare Hilfen), references/ (Zusatzdokumente) und assets/ (Vorlagen und statische Dateien).
+
+* **Beschreibung entscheidet**: Ist sie zu vage, wird der Skill nie ausgewählt. Nenne konkrete Auslöser, z. B. "neues Fenster", "Dialog".
+
+* **Ablage**: .agents/skills/ ist der gemeinsame Ort für mehrere Tools. Copilot findet Skills auch in .github/skills/, Claude Code nutzt .claude/skills/.
+
+* **Offener Standard**: Skills sind portabel. Derselbe Ordner funktioniert in mehreren Agenten, die den Standard unterstützen, inklusive Copilot in VS Code.
+
+* **Skill statt Instructions**: Instructions enthalten Richtlinien, die immer gelten. Skills enthalten Fähigkeiten und Abläufe, die nur bei Bedarf gebraucht werden.
+
+==== Dateistruktur
 
 * Allgemein(Ausnahme Claude Code):
 ** `.agents/skills/`
@@ -99,11 +269,49 @@ Ein Ordner mit einer Anleitung `SKILL.md`, optional mit Vorlagen und Skripten, f
 * Continue:
 ** unterstützt Skills, Pfad ?
 
-''''
-=== 8. Hooks:
+==== Beispiel: Skill "neues-formular"
+
+Ordner:
+
+----
+.agents/skills/neues-formular/
+├── SKILL.md
+└── assets/
+    ├── FormVorlage.cs.txt
+    └── FormVorlage.Designer.cs.txt
+----
+
+Datei: `.agents/skills/neues-formular/SKILL.md`
+
+[source,markdown]
+----
+---
+name: neues-formular <1>
+description: Legt ein neues WinForms-Formular im Designer-kompatiblen Muster an (partial class mit Designer.cs). Verwenden, wenn ein neues Fenster oder ein neuer Dialog gebraucht wird. <2>
+---
+# Neues Formular anlegen <3>
+
+1. Frage nach Name und Zweck des Formulars, falls nicht genannt.
+2. Kopiere `assets/FormVorlage.cs.txt` und `assets/FormVorlage.Designer.cs.txt` <4>
+   nach `src/UI/` und benenne sie in `<Name>Form.cs` und `<Name>Form.Designer.cs` um.
+3. Ersetze den Klassennamen. Der Namespace bleibt `LrCatalogSync.UI`.
+4. Halte die Formular-Regeln der `AGENTS.md` ein (nur Designer-Stil in `InitializeComponent()`).
+5. Prüfe mit `dotnet build`.
+----
+<1> Kleingeschrieben mit Bindestrichen. Er sollte zum Ordnernamen passen.
+<2> Das wichtigste Feld. Nur anhand dieses Textes entscheidet die KI, ob der Skill passt. Nenne, *was* er tut und *wann* er gebraucht wird.
+<3> Der Ablauf, geschrieben wie ein Prompt. Er wird erst geladen, wenn der Skill passt.
+<4> Mitgelieferte Dateien liegen im Skill-Ordner und werden ebenfalls erst bei Bedarf gelesen.
+
+{blank} +
+
+'''
+=== Hooks:
 
 [NOTE]
 Ein Skript, das bei einem Ereignis automatisch läuft, egal was die KI will. Beispiel: Nach jeder Dateiänderung läuft `dotnet format`, oder vor einem Terminalbefehl wird alles mit `rm -rf` blockiert. Instructions, Prompts und Skills sind nur Bitten an die KI, ein Hook wird garantiert ausgeführt.
+
+==== Dateistruktur
 
 * Bei Github Copilot:
 ** `.github/hooks/*.json`
@@ -114,21 +322,59 @@ Ein Skript, das bei einem Ereignis automatisch läuft, egal was die KI will. Bei
 * Claude Code:
 ** `.claude/settings.json`, `.claude/settings.local.json`, `~/.claude/settings.json`
 
+==== Beispiel: Hook "Stop"
 
-''''
-=== 9. Ignore-Dateien:
+Der `Stop`-Hook läuft, wenn die KI mit ihrer Arbeit fertig sein will. Er baut das Projekt und schickt die KI bei Fehlern zurück an die Arbeit.
 
-[NOTE]
-Legen fest, welche Dateien die KI nicht lesen soll (z. B. `.env`, `appsettings.*.json` mit
-Passwörtern, `*.pfx`). Achtung: Das ist nur Schutz nach bestem Bemühen. Ein Agent mit
-Terminalzugriff kann Dateien oft trotzdem per Befehl lesen. Geheimnisse gehören deshalb gar
-nicht in den Projektordner (Umgebungsvariablen, User Secrets, Secret-Manager).
+Datei 1: `.github/hooks/build.json`
 
-* Bei Github Copilot:
-** keine lokale Ignore-Datei
-* Codex (ChatGPT):
-** keine Ignore-Datei bekannt
-* Continue:
-** `.continueignore` (gitignore-Syntax)
-* Claude Code:
-** `.claude/settings.json` mit `permissions.deny`, z. B. `Read(./.env)`
+[source,json]
+----
+{
+  "hooks": {
+    "Stop": [ <1>
+      {
+        "type": "command",
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .github/hooks/build-check.ps1",
+        "timeout": 120 <2>
+      }
+    ]
+  }
+}
+----
+<1> Ereignis: Die KI ist im Begriff, ihre Arbeit zu beenden.
+<2> Ein Build braucht länger als 30 Sekunden (Standard), besonders auf dem Netzlaufwerk.
+
+Datei 2: `.github/hooks/build-check.ps1`
+
+[source,powershell]
+----
+$hookInput = [Console]::In.ReadToEnd() | ConvertFrom-Json
+$erlauben = @{ continue = $true } | ConvertTo-Json -Compress
+
+if ($hookInput.stop_hook_active) { $erlauben; exit 0 } <1>
+
+$geaendert = git status --porcelain -- '*.cs' '*.csproj' 2>$null
+if ($LASTEXITCODE -eq 0 -and -not $geaendert) { $erlauben; exit 0 } <2>
+
+$ausgabe = & dotnet build LrCatalogSync.csproj --nologo -v q 2>&1 | Out-String <3>
+
+if ($LASTEXITCODE -ne 0) {
+  $fehler = ($ausgabe -split "`r?`n" | Where-Object { $_ -match ': error ' } |
+             Select-Object -First 10) -join "`n" <4>
+  @{
+    hookSpecificOutput = @{
+      hookEventName = 'Stop'
+      decision      = 'block' <5>
+      reason        = "dotnet build ist fehlgeschlagen. Behebe diese Fehler:`n$fehler"
+    }
+  } | ConvertTo-Json -Depth 5 -Compress
+} else {
+  $erlauben
+}
+----
+<1> Schutz vor Endlosschleife: Wurde die KI schon einmal zurückgeschickt, darf sie diesmal aufhören.
+<2> Keine geänderten Code-Dateien: kein Build nötig. Schlägt Git selbst fehl (z. B. "dubious ownership"), wird sicherheitshalber gebaut.
+<3> Der Build. Ohne Änderung des Skripts könntest du hier auch `dotnet test` eintragen.
+<4> Nur die ersten zehn Fehlerzeilen, damit die Meldung kurz bleibt.
+<5> `block` verhindert das Beenden. Der `reason` geht an die KI, damit sie weiß, was zu beheben ist.
