@@ -2,13 +2,11 @@
 
 Eine Anleitung für Entwickler die KI effektiver nutzen wollen. Die Beispiele beziehen sich speziell auf VSCode und VSCodium, die meisten Hinweise gelten aber auch für andere Editoren und IDEs.
 
-:toc: macro
+:toc:
 :toclevels: 4
 :sectnums:
 
 == Beschreibung der einzelnen KI Komponenten
-
-toc::[]
 
 === Modus passend auswählen
 
