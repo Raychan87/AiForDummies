@@ -8,7 +8,7 @@ Eine Anleitung für Entwickler die KI effektiver nutzen wollen. Die Beispiele be
 
 == Beschreibung der einzelnen KI Komponenten
 
-=== Modus passend auswählen
+=== [blue]#Modus passend auswählen#
 
 * `Ask`/`Chat`: zum Fragen und Verstehen
 * `Plan`: lässt dich den Plan prüfen und freigeben, bevor der Agent Code schreibt.
@@ -17,14 +17,14 @@ Eine Anleitung für Entwickler die KI effektiver nutzen wollen. Die Beispiele be
 {blank} +
 
 '''
-=== Kontext gezielt mitgeben.
+=== [blue]#Kontext gezielt mitgeben.#
 
 * Hänge relevante Datien, Ordner oder Selektionen an, statt die KI raten zu lassen. 
 
 {blank} +
 
 '''
-=== Instrutioncs: Regeln, Stil, Architektur, Sicherheit
+=== [blue]#Instrutioncs: Regeln, Stil, Architektur, Sicherheit#
 
 [NOTE]
 Lege einmalig fest, wie deine KI arbeiten soll, etwa Stack, Namenskonventionen, Architektur und Sicherheitsregeln. Laut VS-Code-Doku gehören dort Coding-Stil, bevorzugte Bibliotheken, Architekturmuster sowie Sicherheits- und Fehlerbehandlungsregeln hinein. Mit AGENTS.md kannst du projektspezifische Anweisungen teilen und alle Agenten auf denselben Stand bringen
@@ -91,7 +91,7 @@ WinForms-App (.NET 10), die einen Lightroom-Katalog per rclone auf ein NAS synch
 {blank} +
 
 '''
-=== Promt-Dateien:
+=== [blue]#Promt-Dateien:#
 
 [NOTE]
 Ein gespeicherter Textbaustein für eine Aufgabe, die du per `/name` startest. Statt jedes Mal denselben langen Auftrag zu tippen, rufst du ihn ab. Beispiel: `/write-tests` enthält "Schreibe xUnit-Tests für die markierte Klasse, Namensschema Methode_Zustand_Ergebnis, danach dotnet test ausführen".
@@ -137,9 +137,9 @@ Prüfe die aktuellen Änderungen (`git diff`) gegen die <3>
 Gehe die Regeln 1–6 einzeln durch: <4>
 - Ist die Regel von der Änderung berührt?
 - Falls ja: Ist sie eingehalten? Bei Verstößen Datei und Zeile nennen.
-
 Ändere keinen Code. Schließe mit einer Zusammenfassung in drei Sätzen ab. <5>
 ----
+
 <1> Kurzbeschreibung. Sie erscheint in der Liste, wenn du `/` tippst.
 <2> Modus, in dem der Auftrag läuft: `ask`, `edit`, `agent` oder der Name eines eigenen Agenten. Hier `agent`, weil der Diff über das Terminal gelesen wird.
 <3> Der eigentliche Auftrag, geschrieben wie ein normaler Prompt. Der Markdown-Link lädt die `AGENTS.md` als Kontext.
@@ -149,7 +149,7 @@ Gehe die Regeln 1–6 einzeln durch: <4>
 {blank} +
 
 '''
-=== Custom-Agents:
+=== [blue]#Custom-Agents:#
 
 [NOTE]
 Ein Custom-Agent ist eine Rolle mit eigenen Anweisungen, Tool-Auswahl und optional eigenem Modell,
@@ -220,7 +220,7 @@ Du setzt freigegebene Pläne für LrCatalogSync um.
 {blank} +
 
 '''
-=== MCP-Konfiguration:
+=== [blue]#MCP-Konfiguration:#
 
 [NOTE]
 MCP liefert Live-Daten aus externen Systemen. MCP brauchst du z. B. für Datenbanken, Issue-Tracker, Dokumentation oder externe Tools.
@@ -239,7 +239,7 @@ MCP liefert Live-Daten aus externen Systemen. MCP brauchst du z. B. für Datenba
 {blank} +
 
 '''
-=== Skills:
+=== [blue]#Skills:#
 
 [NOTE]
 Ein Ordner mit einer Anleitung `SKILL.md`, optional mit Vorlagen und Skripten, für einen bestimmten Arbeitsablauf. Die KI sieht dauerhaft nur Name und Beschreibung. Passt eine Aufgabe, lädt sie die ganze Anleitung selbst. Beispiel: Ein Skill "neues-formular" beschreibt, wie ein WinForms-Formular samt Presenter und Test angelegt wird. Wenn du sagst "Lege ein Formular für Kunden an", holt die KI ihn von selbst. Der Unterschied zur Prompt-Datei ist, dass die KI entscheidet und nicht du. Der Unterschied zu Instructions ist, dass Skills nur bei Bedarf Platz im Kontext belegen.
@@ -306,7 +306,7 @@ description: Legt ein neues WinForms-Formular im Designer-kompatiblen Muster an 
 {blank} +
 
 '''
-=== Hooks:
+=== [blue]#Hooks:#
 
 [NOTE]
 Ein Skript, das bei einem Ereignis automatisch läuft, egal was die KI will. Beispiel: Nach jeder Dateiänderung läuft `dotnet format`, oder vor einem Terminalbefehl wird alles mit `rm -rf` blockiert. Instructions, Prompts und Skills sind nur Bitten an die KI, ein Hook wird garantiert ausgeführt.
