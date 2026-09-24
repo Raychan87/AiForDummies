@@ -1,0 +1,134 @@
+= AI for Dummies
+
+Eine Anleitung für Entwickler die KI effektiver nutzen wollen. Die Beispiele beziehen sich speziell auf VSCode und VSCodium, die meisten Hinweise gelten aber auch für andere Editoren und IDEs.
+
+== VSCode/Codium KI Chat Bedienung
+
+=== 1. Modus passend auswählen
+
+* `Ask`/`Chat`: zum Fragen und Verstehen
+* `Plan`: lässt dich den Plan prüfen und freigeben, bevor der Agent Code schreibt.
+* `Agent`: arbeitet über mehrere Dateien hinweg, führt Tests aus und validiert Ergebnisse
+
+''''
+=== 2. Kontext gezielt mitgeben.
+
+* Hänge relevante Datien, Ordner oder Selektionen an, statt die KI raten zu lassen. 
+
+''''
+=== 3. Instrutioncs: Regeln, Stil, Architektur, Sicherheit
+
+[NOTE]
+Lege einmalig fest, wie deine KI arbeiten soll, etwa Stack, Namenskonventionen, Architektur und Sicherheitsregeln. Laut VS-Code-Doku gehören dort Coding-Stil, bevorzugte Bibliotheken, Architekturmuster sowie Sicherheits- und Fehlerbehandlungsregeln hinein. Mit AGENTS.md kannst du projektspezifische Anweisungen teilen und alle Agenten auf denselben Stand bringen
+
+* Allgemein:
+
+** `AGENTS.md` - ist ein offenes, herstellerneutrales Format. OpenAI hat es im August 2025 veröffentlicht und später an die Agentic AI Foundation der Linux Foundation übergeben. Die Unterstützung reicht von Codex über Cursor, Devin und Gemini CLI bis zu GitHub Copilot und VS Code. 
+
+* Bei Github Copilot:
+** `.github/copilot-instructions.md`
+** `.github/instructions/*.instructions.md` (nur für bestimmte Dateien, per `applyTo`)
+* Codex (ChatGPT):
+** `AGENTS.md` (+ `AGENTS.override.md`); `~/.codex/config.toml` nur für Einstellungen
+* Continue:
+** `.continue/rules/*.md` (Markdown mit Frontmatter: name, globs, alwaysApply)
+* Claude Code:
+** `CLAUDE.md` (ohne CLAUDE.md fällt neuere Version auf `AGENTS.md` zurück)
+
+''''
+=== 4. Promt-Dateien:
+
+[NOTE]
+Ein gespeicherter Textbaustein für eine Aufgabe, die du per `/name` startest. Statt jedes Mal denselben langen Auftrag zu tippen, rufst du ihn ab. Beispiel: `/write-tests` enthält "Schreibe xUnit-Tests für die markierte Klasse, Namensschema Methode_Zustand_Ergebnis, danach dotnet test ausführen".
+
+* Bei Github Copilot:
+** `.github/prompts/*.prompt.md`
+* Codex (ChatGPT):
+** `~/.codex/prompts/` (User-Ebene), Aufruf mit `/prompts:name`
+* Continue:
+** `.continue/prompts/*.md` mit `invokable: true` im Frontmatter
+* Claude Code:
+** `.claude/commands/`
+
+''''
+=== 5. Custom-Agents:
+
+[NOTE]
+Ein Custom-Agent ist eine Rolle mit eigenen Anweisungen, Tool-Auswahl und optional eigenem Modell,
+z. B. Planer oder Reviewer.
+
+* Bei Github Copilot:
+** `.github/agents/*.agent.md`
+* Codex (ChatGPT):
+** `.codex/agents/*.toml`
+* Continue:
+** `.continue/agents/`
+* Claude Code:
+** `.claude/agents/`
+
+
+''''
+=== 6. MCP-Konfiguration:
+
+[NOTE]
+MCP liefert Live-Daten aus externen Systemen. MCP brauchst du z. B. für Datenbanken, Issue-Tracker, Dokumentation oder externe Tools.
+
+* Bei Github Copilot:
+** `.vscode/mcp.json`
+* Codex (ChatGPT):
+** `~/.codex/config.toml` oder projektweit `.codex/config.toml`
+* Continue:
+** `.continue/mcpServers/` (YAML oder `mcp.json`)
+* Claude Code:
+** `.mcp.json`
+
+
+
+''''
+=== 7. Skills:
+
+[NOTE]
+Ein Ordner mit einer Anleitung `SKILL.md`, optional mit Vorlagen und Skripten, für einen bestimmten Arbeitsablauf. Die KI sieht dauerhaft nur Name und Beschreibung. Passt eine Aufgabe, lädt sie die ganze Anleitung selbst. Beispiel: Ein Skill "neues-formular" beschreibt, wie ein WinForms-Formular samt Presenter und Test angelegt wird. Wenn du sagst "Lege ein Formular für Kunden an", holt die KI ihn von selbst. Der Unterschied zur Prompt-Datei ist, dass die KI entscheidet und nicht du. Der Unterschied zu Instructions ist, dass Skills nur bei Bedarf Platz im Kontext belegen.
+
+* Allgemein(Ausnahme Claude Code):
+** `.agents/skills/`
+* Codex (ChatGPT):
+** `.agents/skills/` (Projekt), `~/.codex/skills/` (User)
+* Claude Code:
+** `.claude/skills/`
+* Continue:
+** unterstützt Skills, Pfad ?
+
+''''
+=== 8. Hooks:
+
+[NOTE]
+Ein Skript, das bei einem Ereignis automatisch läuft, egal was die KI will. Beispiel: Nach jeder Dateiänderung läuft `dotnet format`, oder vor einem Terminalbefehl wird alles mit `rm -rf` blockiert. Instructions, Prompts und Skills sind nur Bitten an die KI, ein Hook wird garantiert ausgeführt.
+
+* Bei Github Copilot:
+** `.github/hooks/*.json`
+* Codex (ChatGPT):
+** `~/.codex/hooks.json` (+ `codex_hooks = true` in der config.toml)
+* Continue:
+** nichts gefunden
+* Claude Code:
+** `.claude/settings.json`, `.claude/settings.local.json`, `~/.claude/settings.json`
+
+
+''''
+=== 9. Ignore-Dateien:
+
+[NOTE]
+Legen fest, welche Dateien die KI nicht lesen soll (z. B. `.env`, `appsettings.*.json` mit
+Passwörtern, `*.pfx`). Achtung: Das ist nur Schutz nach bestem Bemühen. Ein Agent mit
+Terminalzugriff kann Dateien oft trotzdem per Befehl lesen. Geheimnisse gehören deshalb gar
+nicht in den Projektordner (Umgebungsvariablen, User Secrets, Secret-Manager).
+
+* Bei Github Copilot:
+** keine lokale Ignore-Datei
+* Codex (ChatGPT):
+** keine Ignore-Datei bekannt
+* Continue:
+** `.continueignore` (gitignore-Syntax)
+* Claude Code:
+** `.claude/settings.json` mit `permissions.deny`, z. B. `Read(./.env)`
