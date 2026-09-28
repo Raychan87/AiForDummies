@@ -6,7 +6,7 @@ Eine Anleitung für Entwickler die KI effektiver nutzen wollen. Die Beispiele be
 :toclevels: 4
 :sectnums:
 
-== Beschreibung der einzelnen KI Komponenten
+== VSCode/VSCodium spezifische Tipps
 
 === [blue]#Modus passend auswählen#
 
@@ -16,17 +16,24 @@ Eine Anleitung für Entwickler die KI effektiver nutzen wollen. Die Beispiele be
 
 {blank} +
 
+== Allgemeine Tipps
+
 '''
-=== [blue]#Kontext gezielt mitgeben.#
+=== [blue]#Genauigkeit erhöhen.#
 
 * Hänge relevante Datien, Ordner oder Selektionen an, statt die KI raten zu lassen. 
+
+=== [blue]#Beschleunigen von KI-Anfragen#
+
+* Agenten mit weniger Tools, arbeiten in der Regel schneller, da sie weniger Kontext berücksichtigen müssen.
+
 
 {blank} +
 
 '''
 === [blue]#Instrutioncs: Regeln, Stil, Architektur, Sicherheit#
 
-[NOTE]
+[TIP]
 Lege einmalig fest, wie deine KI arbeiten soll, etwa Stack, Namenskonventionen, Architektur und Sicherheitsregeln. Laut VS-Code-Doku gehören dort Coding-Stil, bevorzugte Bibliotheken, Architekturmuster sowie Sicherheits- und Fehlerbehandlungsregeln hinein. Mit AGENTS.md kannst du projektspezifische Anweisungen teilen und alle Agenten auf denselben Stand bringen
 
 ==== Beschreibung/Tipps
@@ -93,7 +100,7 @@ WinForms-App (.NET 10), die einen Lightroom-Katalog per rclone auf ein NAS synch
 '''
 === [blue]#Promt-Dateien:#
 
-[NOTE]
+[TIP]
 Ein gespeicherter Textbaustein für eine Aufgabe, die du per `/name` startest. Statt jedes Mal denselben langen Auftrag zu tippen, rufst du ihn ab. Beispiel: `/write-tests` enthält "Schreibe xUnit-Tests für die markierte Klasse, Namensschema Methode_Zustand_Ergebnis, danach dotnet test ausführen".
 
 ==== Beschreibung/Tipps
@@ -151,20 +158,186 @@ Gehe die Regeln 1–6 einzeln durch: <4>
 '''
 === [blue]#Custom-Agents:#
 
-[NOTE]
+[TIP]
 Ein Custom-Agent ist eine Rolle mit eigenen Anweisungen, Tool-Auswahl und optional eigenem Modell,
 z. B. Planer oder Reviewer.
 
 ==== Dateistruktur
 
 * Bei Github Copilot:
-** `.github/agents/*.agent.md`
+** `.github/agents/*.agent.md` (Projekt bezogen)
+** `c:/user/<username>/Appdata/Roaming/Code/user/prompts/*.agent.md` (User-Ebene)
 * Codex (ChatGPT):
 ** `.codex/agents/*.toml`
 * Continue:
 ** `.continue/agents/`
 * Claude Code:
 ** `.claude/agents/`
+
+
+==== Parameter von Custom-Agents
+
+[source,yaml]
+----
+name: architekt                 # Name im Auswahlmenü, sonst der Dateiname
+description: ...                # erscheint als Platzhaltertext im Eingabefeld
+argument-hint: ...              # Hinweistext, was du eingeben sollst
+tools: ['read', 'edit', 'web']  # erlaubte Werkzeuge, siehe unten
+model: GPT-5.2 (copilot)        # festes Modell für diesen Agenten
+agents: ['Explore']             # welche anderen Agenten dieser hier aufrufen darf (mit tools: ['agent'])
+skills: ['record-aus-template'] # schränkt sichtbare Skills auf diese Liste ein
+user-invokable: false           # versteckt den Agenten aus der Auswahl, bleibt aber als Unteragent nutzbar
+disable-model-invocation: true  # verhindert, dass er als Unteragent aufgerufen wird, bleibt aber wählbar
+target: vscode                  # vscode oder github-copilot (wo der Agent läuft)
+handoffs:                       # Liste der Übergaben an andere Agenten
+  - label: Weiter zur Umsetzung # Beschriftung des Buttons
+    agent: umsetzer               # Name des Ziel-Agenten. Er muss genau zum `name` der zweiten Datei passen.
+    prompt: Setze den Plan oben um. # Der vorbereitete Prompt, der beim Wechsel im Eingabefeld steht.
+    send: false                  # `false` = der Prompt wird nur vorausgefüllt, du prüfst ihn und sendest selbst. Bei `true` würde er sofort abgeschickt.
+    model: GPT-5.2 (copilot)     # Modell nur für diesen Handoff-Schritt
+----
+
+==== Tools für Custom-Agents in VSCode/VSCodium
+
+[TIP]
+In `tools:` eines Custom Agents reichen meist die sieben Gruppennamen
+(`read`, `search`, `edit`, `execute`, `web`, `browser`, `agent`). Einzelne
+Werkzeuge (z. B. `search/codebase`) trägst du nur ein, wenn du gezielter
+einschränken willst.
+
+[cols="1,2,3", options="header"]
+|===
+| Bereich | Werkzeug | Beschreibung
+
+.3+| Lesen
+| `read` (Gruppe)
+| Dateien und Ausführungsergebnisse lesen
+
+| `read/readFile`
+| eine Datei lesen
+
+| `read/problems`
+| Diagnosen aus dem Problems-Panel abrufen (Fehler, Warnungen)
+
+.7+| Suchen
+| `search` (Gruppe)
+| im Projekt suchen
+
+| `search/codebase`
+| passenden Code über die semantische Projektsuche finden
+
+| `search/textSearch`
+| Text in Dateien finden
+
+| `search/fileSearch`
+| Dateien über ein Glob-Muster finden
+
+| `search/listDirectory`
+| Ordnerinhalt auflisten
+
+| `search/usages`
+| Referenzen, Implementierungen und Definitionen eines Symbols finden
+
+| `search/changes`
+| Änderungen der Versionskontrolle auflisten
+
+.7+| Bearbeiten
+| `edit` (Gruppe)
+| Dateien und Notebooks ändern
+
+| `edit/createFile`
+| Datei anlegen
+
+| `edit/createDirectory`
+| Ordner anlegen
+
+| `edit/editFiles`
+| Änderungen in Dateien einfügen
+
+| `edit/editNotebook`
+| ein Notebook bearbeiten
+
+| `read/getNotebookSummary`
+| Zellen eines Notebooks mit Details auflisten
+
+| `read/readNotebookCellOutput`
+| Ausgabe einer Notebook-Zelle lesen
+
+.8+| Ausführen & Testen
+| `execute` (Gruppe)
+| Befehle, Tasks und Notebook-Zellen ausführen
+
+| `execute/runInTerminal`
+| einen Shell-Befehl im integrierten Terminal ausführen
+
+| `execute/getTerminalOutput`
+| Ausgabe eines laufenden Terminalbefehls abrufen
+
+| `execute/createAndRunTask`
+| einen VS-Code-Task anlegen und starten
+
+| `execute/testFailure`
+| Informationen zu einem fehlgeschlagenen Unit-Test abrufen
+
+| `execute/runNotebookCell`
+| eine Notebook-Zelle ausführen
+
+| `read/terminalLastCommand`
+| letzten Terminalbefehl samt Ausgabe abrufen
+
+| `read/terminalSelection`
+| aktuelle Markierung im Terminal abrufen
+
+.5+| Web & GitHub
+| `web` (Gruppe)
+| auf Webinhalte zugreifen
+
+| `web/fetch`
+| eine Webseite abrufen
+
+| `browser` (Gruppe)
+| Webseiten öffnen, prüfen und bedienen (Browser-Tools)
+
+| `githubRepo`
+| ein GitHub-Repository semantisch durchsuchen (`besitzer/repo`)
+
+| `githubTextSearch`
+| ein GitHub-Repository oder eine Organisation nach Text/Code durchsuchen
+
+.4+| Delegieren & Verfolgen
+| `agent` (Gruppe)
+| Aufgaben an Unteragenten delegieren
+
+| `agent/runSubagent`
+| eine Aufgabe in einem eigenen, isolierten Unteragenten-Kontext ausführen
+
+| `todos`
+| Aufgabenfortschritt mit einer Todo-Liste verfolgen
+
+| `vscode/askQuestions`
+| Rückfragen mit interaktiven Auswahlmöglichkeiten stellen
+
+.6+| Projekt & Editor
+| `newWorkspace`
+| ein neues Projekt anlegen
+
+| `vscode/extensions`
+| nach Erweiterungen suchen und Informationen dazu abrufen
+
+| `vscode/getProjectSetupInfo`
+| Anleitung und Konfiguration für das Aufsetzen eines Projekts abrufen
+
+| `vscode/installExtension`
+| eine Erweiterung installieren
+
+| `vscode/runCommand`
+| einen VS-Code-Befehl ausführen
+
+| `vscode/VSCodeAPI`
+| Informationen zu Editor-Funktionen und Extension-APIs abrufen
+|===
+
+
 
 ==== Beispiel: Planer und Umsetzer
 
@@ -222,7 +395,7 @@ Du setzt freigegebene Pläne für LrCatalogSync um.
 '''
 === [blue]#MCP-Konfiguration:#
 
-[NOTE]
+[TIP]
 MCP liefert Live-Daten aus externen Systemen. MCP brauchst du z. B. für Datenbanken, Issue-Tracker, Dokumentation oder externe Tools.
 
 ==== Dateistruktur
@@ -241,7 +414,7 @@ MCP liefert Live-Daten aus externen Systemen. MCP brauchst du z. B. für Datenba
 '''
 === [blue]#Skills:#
 
-[NOTE]
+[TIP]
 Ein Ordner mit einer Anleitung `SKILL.md`, optional mit Vorlagen und Skripten, für einen bestimmten Arbeitsablauf. Die KI sieht dauerhaft nur Name und Beschreibung. Passt eine Aufgabe, lädt sie die ganze Anleitung selbst. Beispiel: Ein Skill "neues-formular" beschreibt, wie ein WinForms-Formular samt Presenter und Test angelegt wird. Wenn du sagst "Lege ein Formular für Kunden an", holt die KI ihn von selbst. Der Unterschied zur Prompt-Datei ist, dass die KI entscheidet und nicht du. Der Unterschied zu Instructions ist, dass Skills nur bei Bedarf Platz im Kontext belegen.
 
 ==== Beschreibung/Tipps
@@ -308,7 +481,7 @@ description: Legt ein neues WinForms-Formular im Designer-kompatiblen Muster an 
 '''
 === [blue]#Hooks:#
 
-[NOTE]
+[TIP]
 Ein Skript, das bei einem Ereignis automatisch läuft, egal was die KI will. Beispiel: Nach jeder Dateiänderung läuft `dotnet format`, oder vor einem Terminalbefehl wird alles mit `rm -rf` blockiert. Instructions, Prompts und Skills sind nur Bitten an die KI, ein Hook wird garantiert ausgeführt.
 
 ==== Dateistruktur
