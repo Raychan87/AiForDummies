@@ -417,6 +417,11 @@ MCP liefert Live-Daten aus externen Systemen. MCP brauchst du z. B. für Datenba
 [TIP]
 Ein Ordner mit einer Anleitung `SKILL.md`, optional mit Vorlagen und Skripten, für einen bestimmten Arbeitsablauf. Die KI sieht dauerhaft nur Name und Beschreibung. Passt eine Aufgabe, lädt sie die ganze Anleitung selbst. Beispiel: Ein Skill "neues-formular" beschreibt, wie ein WinForms-Formular samt Presenter und Test angelegt wird. Wenn du sagst "Lege ein Formular für Kunden an", holt die KI ihn von selbst. Der Unterschied zur Prompt-Datei ist, dass die KI entscheidet und nicht du. Der Unterschied zu Instructions ist, dass Skills nur bei Bedarf Platz im Kontext belegen.
 
+==== Links für Skills
+
+[TIP]
+Hier findest du eine Sammlung von Skills: https://www.skills.sh/
+
 ==== Beschreibung/Tipps
 
 * **Spart Kontext**: Die KI sieht dauerhaft nur Name und Beschreibung. Die Anleitung und die Dateien in references/ oder scripts/ lädt sie erst bei Bedarf. Deshalb sind auch viele Skills unproblematisch.
